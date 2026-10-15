@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'self' 'unsafe-inline'; manifest-src 'self'; worker-src 'self'; connect-src 'self'">
+<meta name="theme-color" content="#24375e">
+<title>HaushaltsPilot</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+<script>const LOGO="data:image/png;base64,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";const VORSCHAU=false;</script>
+<style>
+/* Layout: eine Spalte wie eine native App - Kopfband, Inhalt, feste Leiste unten mit drei Bereichen */
+:root{
+  --bg:#f1f3f7; --karte:#ffffff; --linie:#dde2ea; --text:#14213d; --ged:#5f697d;
+  --prim:#24375e; --primh:#3a5285; --akz:#c0661a; --rot:#b42318; --gruen:#3f7d3a;
+  --bar:#e6eaf1; --chip:#eef1f6;
+  --f-text:system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --f-zahl:system-ui,"Segoe UI",Roboto,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1624; --karte:#18223a; --linie:#2a3654; --text:#e8ecf4; --ged:#9aa6bd;
+  --prim:#2b4373; --primh:#3b5a96; --akz:#e08a3e; --rot:#f0786b; --gruen:#7cc274;
+  --bar:#24304b; --chip:#22304d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1624; --karte:#18223a; --linie:#2a3654; --text:#e8ecf4; --ged:#9aa6bd;
+  --prim:#2b4373; --primh:#3b5a96; --akz:#e08a3e; --rot:#f0786b; --gruen:#7cc274;
+  --bar:#24304b; --chip:#22304d; color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--f-text);font-size:15px;line-height:1.4}
+*{box-sizing:border-box}
+button,input{font:inherit;color:inherit}
+.kopf{background:#24375e;color:#fff;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;
+  padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;align-items:center;gap:10px}
+.kopf img{width:30px;height:30px;border-radius:7px}
+.kopf .name{font-weight:650;font-size:17px;letter-spacing:.01em}
+.kopf .name b{color:#f0a35a;font-weight:650}
+.kopf .stand{margin-left:auto;font-size:12px;opacity:.8;text-align:right}
+main{max-width:560px;margin:0 auto;padding-block:14px 96px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px}
+.karte{background:var(--karte);border:1px solid var(--linie);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--ged);margin:0;font-weight:650}
+.hinweis{font-size:13px;color:var(--ged);margin:0}
+.banner{background:var(--chip);border:1px dashed var(--linie);border-radius:10px;padding:8px 12px;font-size:13px;color:var(--ged)}
+label{font-size:13px;color:var(--ged);display:block;margin-bottom:4px}
+input[type=text],input[type=date],input[type=search]{width:100%;border:1px solid var(--linie);background:var(--karte);border-radius:9px;padding:10px 12px;min-height:44px}
+input:focus-visible,button:focus-visible{outline:2px solid var(--akz);outline-offset:2px}
+.betrag{display:flex;align-items:baseline;gap:8px;border-bottom:2px solid var(--linie);padding-bottom:4px}
+.betrag input{border:0;background:transparent;font-family:var(--f-zahl);font-size:38px;font-weight:650;width:100%;min-width:0;padding:0;font-variant-numeric:tabular-nums}
+.betrag input:focus{outline:none}
+.betrag:focus-within{border-color:var(--akz)}
+.betrag span{font-size:26px;color:var(--ged)}
+.reihe{display:flex;gap:10px;flex-wrap:wrap}
+.reihe>*{flex:1 1 140px;min-width:0}
+.knopf{border:1px solid #8a9bbd;background:var(--karte);border-radius:10px;min-height:46px;padding:0 16px;font-weight:600;cursor:pointer}
+.knopf.haupt{background:var(--prim);border-color:var(--prim);color:#fff}
+.knopf.haupt:hover{background:var(--primh)}
+.knopf.weg{color:var(--rot);border-color:var(--linie)}
+.knopf:disabled{opacity:.45;cursor:default}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--linie);background:var(--chip);border-radius:999px;padding:6px 12px;font-size:14px;cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--prim);border-color:var(--prim);color:#fff}
+.gewaehlt{display:flex;align-items:center;gap:8px;background:var(--chip);border-radius:10px;padding:10px 12px}
+.gewaehlt .n{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gewaehlt .k{font-size:12px;color:var(--ged)}
+.gewaehlt button{margin-left:auto;border:0;background:none;color:var(--akz);font-weight:600;cursor:pointer;padding:6px}
+.art{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:6px;padding:2px 6px}
+.art.A{background:color-mix(in srgb,var(--rot) 14%,transparent);color:var(--rot)}
+.art.E{background:color-mix(in srgb,var(--gruen) 16%,transparent);color:var(--gruen)}
+.liste{max-height:300px;overflow-y:auto;border:1px solid var(--linie);border-radius:10px}
+.liste .grp{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ged);padding:8px 12px 4px;background:var(--bg);position:sticky;top:0}
+.liste button{display:flex;width:100%;text-align:left;border:0;border-top:1px solid var(--linie);background:var(--karte);padding:11px 12px;cursor:pointer;gap:8px;align-items:center}
+.liste button:hover{background:var(--chip)}
+.zeile{display:grid;grid-template-columns:auto 1fr auto auto;gap:4px 10px;align-items:center;padding:8px 0;border-top:1px solid var(--linie)}
+.zeile:first-child{border-top:0}
+.zeile .d{font-size:12px;color:var(--ged);font-variant-numeric:tabular-nums}
+.zeile .n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.zeile .n small{display:block;color:var(--ged);font-size:12px}
+.zeile .b{font-variant-numeric:tabular-nums;font-weight:600;text-align:right}
+.zeile .b.A{color:var(--text)} .zeile .b.E{color:var(--gruen)}
+.zeile .x{border:0;background:none;color:var(--ged);cursor:pointer;padding:6px 8px;border-radius:8px;font-size:13px}
+.zeile .x.sicher{background:var(--rot);color:#fff}
+.status{font-size:11px;border-radius:6px;padding:1px 6px;background:var(--chip);color:var(--ged);margin-left:6px}
+.status.gesendet{color:var(--akz)}
+.summe{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.summe div{background:var(--chip);border-radius:10px;padding:10px}
+.summe small{display:block;font-size:11px;color:var(--ged);text-transform:uppercase;letter-spacing:.05em}
+.summe b{font-size:17px;font-variant-numeric:tabular-nums}
+.rest.minus{color:var(--rot)} .rest.plus{color:var(--gruen)}
+.kat{display:flex;flex-direction:column;gap:5px;padding:9px 0;border-top:1px solid var(--linie)}
+.kat:first-child{border-top:0}
+.kat .oben{display:flex;gap:8px;align-items:baseline}
+.kat .oben .n{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kat .oben .r{margin-left:auto;font-variant-numeric:tabular-nums;font-size:14px;white-space:nowrap}
+.balken{height:8px;background:var(--bar);border-radius:5px;overflow:hidden;position:relative}
+.balken i{position:absolute;inset:0 auto 0 0;background:var(--prim);border-radius:5px}
+.balken i.h{background:var(--akz);opacity:.85}
+.balken.ueber i{background:var(--rot)}
+.kat .unten{font-size:12px;color:var(--ged);font-variant-numeric:tabular-nums}
+.leiste{position:fixed;left:0;right:0;bottom:0;background:var(--karte);border-top:1px solid var(--linie);display:flex;z-index:6;
+  padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.leiste button{flex:1;border:0;background:none;padding:10px 4px 12px;cursor:pointer;color:var(--ged);font-size:12px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative}
+.leiste button svg{width:22px;height:22px}
+.leiste button[aria-current="page"]{color:var(--akz)}
+.zahl{position:absolute;top:5px;left:calc(50% + 6px);background:var(--akz);color:#fff;border-radius:999px;font-size:10px;min-width:17px;height:17px;line-height:17px;padding:0 4px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(78px + env(safe-area-inset-bottom,0px));background:var(--text);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;z-index:9;max-width:calc(100% - 32px);text-align:center}
+.leer{color:var(--ged);font-size:14px;padding:6px 0}
+.fehler{color:var(--rot);font-size:13px;margin:0}
+@media (prefers-reduced-motion:no-preference){.balken i{transition:width .3s}}
+</style>
+
+<header class="kopf">
+  <img id="logo" alt="">
+  <div class="name">Haushalts<b>Pilot</b></div>
+  <div class="stand" id="kopfStand"></div>
+</header>
+
+<main id="inhalt"></main>
+
+<nav class="leiste" aria-label="Bereiche">
+  <button id="tabErfassen" data-tab="erfassen" aria-current="page">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Erfassen</button>
+  <button id="tabUebersicht" data-tab="uebersicht">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Übersicht</button>
+  <button id="tabAustausch" data-tab="austausch">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v13M3 13l4 4 4-4M17 20V7M13 11l4-4 4 4"/></svg>Austausch<span class="zahl" id="zahlOffen" hidden></span></button>
+</nav>
+
+<script>
+"use strict";
+const SPEICHER = "hp.handy.v1";
+const EUR = new Intl.NumberFormat("de-DE", {style: "currency", currency: "EUR"});
+const MONATE = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+let S = {daten: null, buchungen: [], zuletzt: []};
+let tab = "erfassen", gewaehlt = null, suche = "", loeschFrage = null, installEvent = null;
+let entwurf = {betrag: "", datum: heute(), notiz: ""};
+
+function heute() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+function datumKurz(s) { const t = String(s || "").split("-"); return t.length === 3 ? t[2] + "." + t[1] + "." : s; }
+function laden() {
+  try { const x = JSON.parse(localStorage.getItem(SPEICHER) || "null"); if (x && Array.isArray(x.buchungen)) S = Object.assign(S, x); } catch (e) {}
+}
+function speichern() {
+  try { localStorage.setItem(SPEICHER, JSON.stringify(S)); return true; } catch (e) { meldung("Speichern auf dem Handy nicht möglich."); return false; }
+}
+function h(tag, attr, ...kinder) {
+  const el = document.createElement(tag);
+  for (const k in attr || {}) {
+    const v = attr[k];
+    if (v === null || v === undefined || v === false) continue;
+    if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else if (k === "class") el.className = v;
+    else if (k === "style") el.setAttribute("style", v);
+    else el.setAttribute(k, v === true ? "" : v);
+  }
+  for (const c of kinder.flat()) if (c !== null && c !== undefined && c !== false) el.append(c.nodeType ? c : String(c));
+  return el;
+}
+let toastZeit;
+function meldung(t) {
+  document.querySelectorAll(".toast").forEach(x => x.remove());
+  const el = h("div", {class: "toast", role: "status"}, t);
+  document.body.append(el);
+  clearTimeout(toastZeit); toastZeit = setTimeout(() => el.remove(), 3200);
+}
+function uuid() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  const a = new Uint8Array(16); crypto.getRandomValues(a);
+  return Array.from(a, b => b.toString(16).padStart(2, "0")).join("");
+}
+function positionen() { return (S.daten && S.daten.positionen) || []; }
+function posVon(id) { return positionen().find(p => p.id === id) || null; }
+function offen() { return S.buchungen.filter(b => b.status !== "angekommen"); }
+function betragLesen(s) {
+  s = String(s || "").replace(/\s|€/g, "");
+  if (s.includes(",")) s = s.replace(/\./g, "").replace(",", ".");
+  if (!/^\d{1,6}(\.\d{1,2})?$/.test(s)) return 0;
+  const n = Math.round(parseFloat(s) * 100) / 100;
+  return n > 0 && n < 1000000 ? n : 0;
+}
+
+/* ---------- Erfassen ---------- */
+function ansichtErfassen() {
+  const teile = [];
+  if (!S.daten) {
+    teile.push(h("div", {class: "karte"}, h("h2", {}, "Noch keine Daten vom PC"),
+      h("p", {class: "hinweis"}, "Laden Sie unter Austausch die Datei HaushaltsPilot_Handy.json aus Ihrem Austauschordner. Zum Ausprobieren gibt es dort Beispieldaten."),
+      h("button", {class: "knopf haupt", id: "zumAustausch", onclick: () => wechseln("austausch")}, "Zum Austausch")));
+    return teile;
+  }
+  if (S.daten.demo) teile.push(h("div", {class: "banner"}, "Beispieldaten – laden Sie unter Austausch Ihre eigene Datei vom PC."));
+  const betragFeld = h("input", {id: "betrag", type: "text", inputmode: "decimal", autocomplete: "off", placeholder: "0,00", "aria-label": "Betrag in Euro", value: entwurf.betrag,
+    oninput: e => { entwurf.betrag = e.target.value; knopfPruefen(); }});
+  const p = gewaehlt ? posVon(gewaehlt) : null;
+  const karte = h("div", {class: "karte"},
+    h("h2", {}, "Neue Buchung"),
+    h("div", {class: "betrag"}, betragFeld, h("span", {}, "€")),
+    p ? h("div", {class: "gewaehlt"}, h("span", {class: "art " + p.a}, p.a === "E" ? "Einnahme" : "Ausgabe"),
+          h("div", {style: "min-width:0"}, h("div", {class: "n"}, p.n), h("div", {class: "k"}, p.k)),
+          h("button", {id: "posAendern", onclick: () => { gewaehlt = null; zeichnen(); }}, "Ändern"))
+      : positionWahl(),
+    h("div", {class: "reihe"},
+      h("div", {}, h("label", {for: "datum"}, "Datum"), h("input", {id: "datum", type: "date", value: entwurf.datum, max: heute(), oninput: e => entwurf.datum = e.target.value})),
+      h("div", {}, h("label", {for: "notiz"}, "Notiz (optional)"), h("input", {id: "notiz", type: "text", maxlength: "120", value: entwurf.notiz, placeholder: "z. B. Wochenmarkt", oninput: e => entwurf.notiz = e.target.value}))),
+    h("button", {class: "knopf haupt", id: "buchen", onclick: buchen}, "Buchung speichern"),
+    h("p", {class: "hinweis"}, "Gedacht für Barzahlungen. Karten- und Überweisungsbeträge kommen über den Kontoauszug auf den PC."));
+  teile.push(karte);
+  teile.push(listeOffen());
+  setTimeout(knopfPruefen);
+  return teile;
+}
+function positionWahl() {
+  const box = h("div", {});
+  const ps = positionen();
+  const zuletzt = S.zuletzt.map(posVon).filter(Boolean).slice(0, 8);
+  if (zuletzt.length && !suche) box.append(h("div", {class: "chips", style: "margin-bottom:8px"},
+    zuletzt.map(x => h("button", {class: "chip", "aria-pressed": "false", onclick: () => waehlen(x.id)}, x.n))));
+  const feld = h("input", {id: "suche", type: "search", placeholder: "Position suchen …", "aria-label": "Position suchen", value: suche,
+    oninput: e => { suche = e.target.value; listeFuellen(); }});
+  const liste = h("div", {class: "liste", id: "posListe"});
+  function listeFuellen() {
+    liste.textContent = "";
+    const q = suche.trim().toLowerCase();
+    const treffer = ps.filter(x => !q || x.n.toLowerCase().includes(q) || x.k.toLowerCase().includes(q));
+    if (!treffer.length) { liste.append(h("div", {class: "leer", style: "padding:12px"}, "Keine Position gefunden.")); return; }
+    let grp = null;
+    for (const x of treffer.slice(0, 150)) {
+      if (x.k !== grp) { grp = x.k; liste.append(h("div", {class: "grp"}, grp)); }
+      liste.append(h("button", {onclick: () => waehlen(x.id)}, h("span", {style: "min-width:0;flex:1"}, x.n), h("span", {class: "art " + x.a}, x.a === "E" ? "E" : "A")));
+    }
+  }
+  listeFuellen();
+  box.append(h("label", {for: "suche"}, "Position"), feld, h("div", {style: "height:8px"}), liste);
+  return box;
+}
+function waehlen(id) { gewaehlt = id; suche = ""; zeichnen(); }
+function knopfPruefen() {
+  const k = document.getElementById("buchen");
+  if (k) k.disabled = !(betragLesen(entwurf.betrag) > 0 && gewaehlt && entwurf.datum);
+}
+function buchen() {
+  const b = betragLesen(entwurf.betrag), p = posVon(gewaehlt);
+  if (!b || !p) { meldung("Bitte Betrag und Position angeben."); return; }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(entwurf.datum)) { meldung("Bitte ein gültiges Datum wählen."); return; }
+  S.buchungen.push({id: uuid(), d: entwurf.datum, b, pos: p.id, art: p.a, t: entwurf.notiz.trim().slice(0, 120), status: "neu", am: Date.now()});
+  S.zuletzt = [p.id, ...S.zuletzt.filter(x => x !== p.id)].slice(0, 8);
+  if (speichern()) meldung(EUR.format(b) + " für „" + p.n + "“ gespeichert");
+  entwurf = {betrag: "", datum: heute(), notiz: ""}; gewaehlt = null;
+  zeichnen();
+}
+function listeOffen() {
+  const o = offen().slice().sort((a, b) => (b.d + b.am) > (a.d + a.am) ? 1 : -1);
+  const karte = h("div", {class: "karte"}, h("h2", {}, "Noch nicht am PC (" + o.length + ")"));
+  if (!o.length) { karte.append(h("div", {class: "leer"}, "Alles übertragen.")); return karte; }
+  const box = h("div", {});
+  for (const b of o) {
+    const p = posVon(b.pos);
+    const sicher = loeschFrage === b.id;
+    box.append(h("div", {class: "zeile"},
+      h("span", {class: "d"}, datumKurz(b.d)),
+      h("span", {class: "n"}, p ? p.n : "Position " + b.pos, h("span", {class: "status " + b.status}, b.status === "gesendet" ? "gesendet" : "neu"), b.t ? h("small", {}, b.t) : null),
+      h("span", {class: "b " + b.art}, (b.art === "E" ? "+" : "−") + EUR.format(b.b)),
+      h("button", {class: "x" + (sicher ? " sicher" : ""), "aria-label": "Buchung löschen", onclick: () => {
+        if (sicher) { S.buchungen = S.buchungen.filter(x => x.id !== b.id); loeschFrage = null; speichern(); meldung("Gelöscht"); }
+        else loeschFrage = b.id;
+        zeichnen();
+      }}, sicher ? "Löschen?" : "✕")));
+  }
+  karte.append(box);
+  return karte;
+}
+
+/* ---------- Übersicht ---------- */
+function ansichtUebersicht() {
+  const D = S.daten;
+  if (!D) return [h("div", {class: "karte"}, h("h2", {}, "Übersicht"), h("p", {class: "hinweis"}, "Noch keine Daten vom PC geladen."))];
+  const teile = [];
+  if (D.demo) teile.push(h("div", {class: "banner"}, "Beispieldaten"));
+  const praefix = D.jahr + "-" + String(D.monat).padStart(2, "0");
+  const lokal = {};
+  for (const b of offen()) {
+    if (!String(b.d).startsWith(praefix)) continue;
+    const p = posVon(b.pos); if (!p) continue;
+    lokal[p.k] = (lokal[p.k] || 0) + b.b;
+  }
+  const kats = (D.kategorien || []).map(k => ({...k, handy: lokal[k.k] || 0}));
+  for (const k in lokal) if (!kats.some(x => x.k === k)) {
+    const p = positionen().find(x => x.k === k); kats.push({k, a: p ? p.a : "A", plan: 0, ist: 0, handy: lokal[k]});
+  }
+  const aus = kats.filter(k => k.a !== "E"), ein = kats.filter(k => k.a === "E");
+  const sum = (l, f) => l.reduce((s, k) => s + (Number(k[f]) || 0), 0);
+  const ap = sum(aus, "plan"), ai = sum(aus, "ist") + sum(aus, "handy");
+  const kopf = h("div", {class: "karte"},
+    h("h2", {}, "Ausgaben " + MONATE[D.monat - 1] + " " + D.jahr),
+    h("div", {class: "summe"},
+      h("div", {}, h("small", {}, "Plan"), h("b", {}, EUR.format(ap))),
+      h("div", {}, h("small", {}, "Bisher"), h("b", {}, EUR.format(ai))),
+      h("div", {}, h("small", {}, ap - ai >= 0 ? "Noch frei" : "Darüber"), h("b", {class: "rest " + (ap - ai >= 0 ? "plus" : "minus")}, EUR.format(Math.abs(ap - ai))))));
+  if (D.bankBis) kopf.append(h("p", {class: "hinweis"}, "Kontoauszug am PC eingelesen bis " + datumKurz(D.bankBis) + D.bankBis.slice(0, 4) + ". Spätere Kartenzahlungen fehlen hier noch."));
+  else kopf.append(h("p", {class: "hinweis"}, "Am PC ist noch kein Kontoauszug eingelesen – „Bisher“ enthält nur Ihre Handy-Buchungen."));
+  teile.push(kopf);
+  const liste = h("div", {class: "karte"}, h("h2", {}, "Nach Kategorien"));
+  const lb = h("div", {});
+  if (!aus.length) lb.append(h("div", {class: "leer"}, "Für diesen Monat gibt es am PC noch keine Planung."));
+  for (const k of aus.sort((a, b) => (b.plan || 0) - (a.plan || 0))) {
+    const gesamt = (k.ist || 0) + k.handy, plan = k.plan || 0, rest = plan - gesamt;
+    const breite = plan > 0 ? Math.min(100, gesamt / plan * 100) : (gesamt > 0 ? 100 : 0);
+    const hb = plan > 0 ? Math.min(100, k.handy / plan * 100) : 0;
+    lb.append(h("div", {class: "kat"},
+      h("div", {class: "oben"}, h("span", {class: "n"}, k.k), h("span", {class: "r rest " + (rest < 0 ? "minus" : "")}, rest >= 0 ? "noch " + EUR.format(rest) : EUR.format(-rest) + " drüber")),
+      h("div", {class: "balken" + (rest < 0 ? " ueber" : ""), role: "img", "aria-label": EUR.format(gesamt) + " von " + EUR.format(plan)},
+        h("i", {style: "width:" + breite.toFixed(1) + "%"}), k.handy > 0 && rest >= 0 ? h("i", {class: "h", style: "left:" + Math.max(0, breite - hb).toFixed(1) + "%;width:" + hb.toFixed(1) + "%"}) : null),
+      h("div", {class: "unten"}, EUR.format(gesamt) + " von " + EUR.format(plan) + (k.handy > 0 ? "  ·  davon Handy " + EUR.format(k.handy) : ""))));
+  }
+  liste.append(lb);
+  teile.push(liste);
+  if (ein.length) {
+    const ep = sum(ein, "plan"), ei = sum(ein, "ist") + sum(ein, "handy");
+    teile.push(h("div", {class: "karte"}, h("h2", {}, "Einnahmen"),
+      h("div", {class: "summe"},
+        h("div", {}, h("small", {}, "Plan"), h("b", {}, EUR.format(ep))),
+        h("div", {}, h("small", {}, "Eingegangen"), h("b", {}, EUR.format(ei))),
+        h("div", {}, h("small", {}, "Offen"), h("b", {}, EUR.format(Math.max(0, ep - ei)))))));
+  }
+  const f = D.faellig || [];
+  const fk = h("div", {class: "karte"}, h("h2", {}, "Fällig in den nächsten 60 Tagen"));
+  if (!f.length) fk.append(h("div", {class: "leer"}, "Nichts fällig."));
+  for (const x of f) fk.append(h("div", {class: "zeile", style: "grid-template-columns:auto 1fr auto"},
+    h("span", {class: "d"}, datumKurz(x.d)), h("span", {class: "n"}, x.n), h("span", {class: "b"}, EUR.format(x.b))));
+  teile.push(fk);
+  return teile;
+}
+
+/* ---------- Austausch ---------- */
+function ansichtAustausch() {
+  const D = S.daten, o = offen();
+  const datei = h("input", {id: "datei", type: "file", hidden: true, onchange: dateiLaden});
+  const k1 = h("div", {class: "karte"},
+    h("h2", {}, "1 · Übersicht vom PC laden"),
+    h("p", {class: "hinweis"}, D && !D.demo ? "Geladen: Stand vom " + D.stand.replace(/^(\d{4})-(\d\d)-(\d\d)/, "$3.$2.$1") + " Uhr." : "Wählen Sie die Datei HaushaltsPilot_Handy.json aus Ihrem Austauschordner (z. B. in OneDrive)."),
+    datei,
+    h("button", {class: "knopf haupt", id: "laden", onclick: () => datei.click()}, "Datei vom PC laden"),
+    h("p", {class: "fehler", id: "ladeFehler", hidden: true}));
+  const k2 = h("div", {class: "karte"},
+    h("h2", {}, "2 · Buchungen an den PC senden"),
+    h("p", {class: "hinweis"}, o.length ? o.length + " Buchung(en) sind noch nicht am PC angekommen. Speichern Sie die Datei im selben Austauschordner. Doppelt senden schadet nicht." : "Keine offenen Buchungen."),
+    h("button", {class: "knopf haupt", id: "senden", disabled: !o.length, onclick: senden}, o.length ? "Senden (" + o.length + ")" : "Senden"),
+    h("p", {class: "hinweis"}, "Am PC übernimmt der HaushaltsPilot die Buchungen beim nächsten Start oder mit Einstellungen › Jetzt abgleichen. Danach hier erneut die Übersicht laden – angekommene Buchungen verschwinden aus der Liste."));
+  const k3 = h("div", {class: "karte"}, h("h2", {}, "Auf diesem Handy"));
+  if (installEvent) k3.append(h("button", {class: "knopf", id: "installieren", onclick: async () => { installEvent.prompt(); installEvent = null; zeichnen(); }}, "Als App installieren"));
+  k3.append(h("div", {class: "reihe"},
+    h("button", {class: "knopf", id: "demo", onclick: () => { S.daten = beispiel(); speichern(); meldung("Beispieldaten geladen"); zeichnen(); }}, "Beispieldaten laden"),
+    h("button", {class: "knopf weg", id: "alles", onclick: () => {
+      if (loeschFrage !== "*") { loeschFrage = "*"; zeichnen(); return; }
+      S = {daten: null, buchungen: [], zuletzt: []}; loeschFrage = null;
+      try { localStorage.removeItem(SPEICHER); } catch (e) {}
+      meldung("Alle Daten auf diesem Handy gelöscht"); zeichnen();
+    }}, loeschFrage === "*" ? "Wirklich alles löschen?" : "Alle Daten löschen")));
+  k3.append(h("p", {class: "hinweis"}, "Ihre Daten bleiben auf diesem Handy und in Ihrem Austauschordner. Die App sendet nichts ins Internet."));
+  return [k1, k2, k3];
+}
+function dateiLaden(e) {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (!f) return;
+  const fehler = t => { const el = document.getElementById("ladeFehler"); if (el) { el.textContent = t; el.hidden = false; } };
+  if (f.size > 3 * 1048576) { fehler("Die Datei ist zu groß. Bitte HaushaltsPilot_Handy.json wählen."); return; }
+  const r = new FileReader();
+  r.onload = () => {
+    let d;
+    try { d = JSON.parse(String(r.result).replace(/^﻿/, "")); } catch (x) { fehler("Die Datei ist keine gültige Übersicht. Bitte HaushaltsPilot_Handy.json wählen."); return; }
+    if (!d || d.app !== "HaushaltsPilot" || d.v !== 1 || !Array.isArray(d.positionen)) { fehler("Das ist nicht die Übersicht vom HaushaltsPilot (HaushaltsPilot_Handy.json)."); return; }
+    d.positionen = d.positionen.filter(p => p && Number.isInteger(p.id) && typeof p.n === "string").map(p => ({id: p.id, n: p.n, k: String(p.k || ""), a: p.a === "E" ? "E" : "A"}));
+    d.kategorien = Array.isArray(d.kategorien) ? d.kategorien : [];
+    d.faellig = Array.isArray(d.faellig) ? d.faellig : [];
+    const da = new Set(Array.isArray(d.importiert) ? d.importiert.map(String) : []);
+    const vorher = S.buchungen.length;
+    S.buchungen = S.buchungen.filter(b => !da.has(b.id));
+    const angekommen = vorher - S.buchungen.length;
+    S.daten = d;
+    speichern();
+    meldung("Übersicht geladen" + (angekommen ? " · " + angekommen + " Buchung(en) am PC angekommen" : ""));
+    zeichnen();
+  };
+  r.onerror = () => fehler("Die Datei konnte nicht gelesen werden.");
+  r.readAsText(f, "utf-8");
+}
+async function senden() {
+  const o = offen();
+  if (!o.length) return;
+  const jetzt = new Date(), z = n => String(n).padStart(2, "0");
+  const name = "HP_Handy_" + jetzt.getFullYear() + z(jetzt.getMonth() + 1) + z(jetzt.getDate()) + "-" + z(jetzt.getHours()) + z(jetzt.getMinutes()) + z(jetzt.getSeconds()) + ".json";
+  const inhalt = JSON.stringify({app: "HaushaltsPilot-Handy", v: 1, erstellt: jetzt.toISOString(),
+    buchungen: o.map(b => ({id: b.id, d: b.d, b: b.b, pos: b.pos, art: b.art, t: b.t}))});
+  const blob = new Blob([inhalt], {type: "application/json"});
+  let ok = false;
+  try {
+    const file = new File([blob], name, {type: "application/json"});
+    if (navigator.canShare && navigator.canShare({files: [file]})) {
+      await navigator.share({files: [file], title: name});
+      ok = true;
+    }
+  } catch (x) {
+    if (x && x.name === "AbortError") { meldung("Senden abgebrochen"); return; }
+  }
+  if (!ok) {
+    try {
+      const url = URL.createObjectURL(blob);
+      const a = h("a", {href: url, download: name}); document.body.append(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      ok = true;
+      meldung("Datei " + name + " unter Downloads gespeichert – bitte in den Austauschordner verschieben.");
+    } catch (x) { meldung("Senden ist hier nicht möglich. Bitte die installierte App verwenden."); return; }
+  } else meldung("Datei übergeben – bitte im Austauschordner speichern.");
+  for (const b of o) b.status = "gesendet";
+  speichern(); zeichnen();
+}
+
+/* ---------- Beispiel ---------- */
+function beispiel() {
+  const d = new Date(), j = d.getFullYear(), m = d.getMonth() + 1, z = n => String(n).padStart(2, "0");
+  const tag = n => { const x = new Date(j, m - 1, d.getDate() + n); return x.getFullYear() + "-" + z(x.getMonth() + 1) + "-" + z(x.getDate()); };
+  const P = [[1,"Lebensmittel","Haushalt","A"],[2,"Drogerie","Haushalt","A"],[3,"Wochenmarkt","Haushalt","A"],[4,"Tanken","Auto","A"],[5,"Parken","Auto","A"],
+    [6,"Restaurant","Freizeit","A"],[7,"Kino & Kultur","Freizeit","A"],[8,"Geschenke","Sonstiges","A"],[9,"Apotheke","Gesundheit","A"],[10,"Flohmarkt-Verkauf","Nebeneinnahmen","E"]];
+  return {app: "HaushaltsPilot", v: 1, demo: true, stand: j + "-" + z(m) + "-" + z(d.getDate()) + " 08:00", jahr: j, monat: m,
+    positionen: P.map(p => ({id: p[0], n: p[1], k: p[2], a: p[3]})),
+    kategorien: [{k:"Haushalt",a:"A",plan:620,ist:388.4},{k:"Auto",a:"A",plan:240,ist:131.9},{k:"Freizeit",a:"A",plan:150,ist:164.5},
+      {k:"Gesundheit",a:"A",plan:40,ist:12.95},{k:"Sonstiges",a:"A",plan:60,ist:0},{k:"Nebeneinnahmen",a:"E",plan:50,ist:20}],
+    faellig: [{d: tag(6), n: "Kfz-Versicherung", b: 412.8}, {d: tag(19), n: "Grundsteuer", b: 96.5}, {d: tag(41), n: "Hausrat & Haftpflicht", b: 138}],
+    bankBis: tag(-4), importiert: []};
+}
+
+/* ---------- Rahmen ---------- */
+function zeichnen() {
+  const m = document.getElementById("inhalt");
+  const y = window.scrollY;
+  m.textContent = "";
+  const teile = tab === "erfassen" ? ansichtErfassen() : tab === "uebersicht" ? ansichtUebersicht() : ansichtAustausch();
+  m.append(...teile);
+  document.querySelectorAll(".leiste button").forEach(b => { if (b.dataset.tab === tab) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+  const n = offen().length, z = document.getElementById("zahlOffen");
+  z.hidden = !n; z.textContent = n;
+  const ks = document.getElementById("kopfStand");
+  ks.textContent = S.daten ? (S.daten.demo ? "Beispiel" : "PC-Stand " + datumKurz(String(S.daten.stand).slice(0, 10))) : "";
+  window.scrollTo(0, y);
+}
+function wechseln(t) { tab = t; loeschFrage = null; window.scrollTo(0, 0); zeichnen(); }
+document.querySelectorAll(".leiste button").forEach(b => b.addEventListener("click", () => wechseln(b.dataset.tab)));
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvent = e; if (tab === "austausch") zeichnen(); });
+document.getElementById("logo").src = LOGO;
+laden();
+if (!S.daten && VORSCHAU) S.daten = beispiel();
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+zeichnen();
+</script>
+<script>
+if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>
