@@ -1,0 +1,45 @@
+plugins {
+    id 'com.android.application'
+}
+
+def lauf = (System.getenv('GITHUB_RUN_NUMBER') ?: '1') as Integer
+
+android {
+    namespace 'de.frohwerk.haushaltspilot'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'de.frohwerk.haushaltspilot'
+        minSdk 24
+        targetSdk 34
+        versionCode lauf
+        versionName "16.0." + lauf
+    }
+
+    // Eigener Signierschlüssel, damit spätere Versionen sich über die alte installieren lassen
+    signingConfigs {
+        release {
+            storeFile file('../haushaltspilot.jks')
+            storePassword 'vo2K9erw3Vk-mM0US-_EktB5'
+            keyAlias 'haushaltspilot'
+            keyPassword 'vo2K9erw3Vk-mM0US-_EktB5'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.11.0'
+    implementation 'androidx.core:core:1.13.1'
+}

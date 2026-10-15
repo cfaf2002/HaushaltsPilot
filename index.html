@@ -401,6 +401,14 @@ async function senden() {
     buchungen: o.map(b => ({id: b.id, d: b.d, b: b.b, pos: b.pos, art: b.art, t: b.t}))});
   const blob = new Blob([inhalt], {type: "application/json"});
   let ok = false;
+  if (window.HPAndroid) {
+    try { ok = HPAndroid.teilen(name, inhalt) === true; } catch (x) { ok = false; }
+    if (!ok) { meldung("Senden war nicht möglich."); return; }
+    for (const x of o) x.status = "gesendet";
+    speichern(); zeichnen();
+    meldung("Bitte im Austauschordner speichern (z. B. OneDrive › HaushaltsPilot).");
+    return;
+  }
   try {
     const file = new File([blob], name, {type: "application/json"});
     if (navigator.canShare && navigator.canShare({files: [file]})) {
@@ -461,7 +469,7 @@ try { if (navigator.storage && navigator.storage.persist) navigator.storage.pers
 zeichnen();
 </script>
 <script>
-if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
+if (!window.HPAndroid && "serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 </body>
 </html>
