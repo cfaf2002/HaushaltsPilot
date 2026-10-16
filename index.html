@@ -86,10 +86,10 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--akz);outline-of
 .zeile .x.sicher{background:var(--rot);color:#fff}
 .status{font-size:11px;border-radius:6px;padding:1px 6px;background:var(--chip);color:var(--ged);margin-left:6px}
 .status.gesendet{color:var(--akz)}
-.summe{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.summe div{background:var(--chip);border-radius:10px;padding:10px}
+.summe{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.summe div{background:var(--chip);border-radius:10px;padding:9px 8px;min-width:0}
 .summe small{display:block;font-size:11px;color:var(--ged);text-transform:uppercase;letter-spacing:.05em}
-.summe b{font-size:17px;font-variant-numeric:tabular-nums}
+.summe b{display:block;font-size:clamp(13px,4vw,17px);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rest.minus{color:var(--rot)} .rest.plus{color:var(--gruen)}
 .kat{display:flex;flex-direction:column;gap:5px;padding:9px 0;border-top:1px solid var(--linie)}
 .kat:first-child{border-top:0}
@@ -435,13 +435,15 @@ function ansichtUebersicht() {
       h("div", {}, h("small", {}, "Plan"), h("b", {}, EUR.format(ap))),
       h("div", {}, h("small", {}, "Bisher"), h("b", {}, EUR.format(ai))),
       h("div", {}, h("small", {}, ap - ai >= 0 ? "Noch frei" : "Darüber"), h("b", {class: "rest " + (ap - ai >= 0 ? "plus" : "minus")}, EUR.format(Math.abs(ap - ai))))));
+  if (D.offen && D.offen.n > 0) kopf.append(h("p", {class: "hinweis", style: "color:var(--akz)"},
+    D.offen.n + " Kontobuchung(en) dieses Monats über " + EUR.format(D.offen.b) + " sind am PC noch keiner Position zugeordnet und fehlen hier. Zuordnen unter Erfassung › Kontoauszug."));
   if (D.bankBis) kopf.append(h("p", {class: "hinweis"}, "Kontoauszug am PC eingelesen bis " + datumKurz(D.bankBis) + D.bankBis.slice(0, 4) + ". Spätere Kartenzahlungen fehlen hier noch."));
   else kopf.append(h("p", {class: "hinweis"}, "Am PC ist noch kein Kontoauszug eingelesen – „Bisher“ enthält nur Ihre Handy-Buchungen."));
   teile.push(kopf);
   const liste = h("div", {class: "karte"}, h("h2", {}, "Nach Kategorien"));
   const lb = h("div", {});
   if (!aus.length) lb.append(h("div", {class: "leer"}, "Für diesen Monat gibt es am PC noch keine Planung."));
-  for (const k of aus.sort((a, b) => (b.plan || 0) - (a.plan || 0))) {
+  for (const k of aus.filter(k => (k.plan || 0) > 0 || (k.ist || 0) !== 0 || k.handy > 0).sort((a, b) => (b.plan || 0) - (a.plan || 0))) {
     const gesamt = (k.ist || 0) + k.handy, plan = k.plan || 0, rest = plan - gesamt;
     const breite = plan > 0 ? Math.min(100, gesamt / plan * 100) : (gesamt > 0 ? 100 : 0);
     const hb = plan > 0 ? Math.min(100, k.handy / plan * 100) : 0;
