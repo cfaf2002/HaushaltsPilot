@@ -136,7 +136,7 @@ const SPEICHER = "hp.handy.v1";
 const EUR = new Intl.NumberFormat("de-DE", {style: "currency", currency: "EUR"});
 const MONATE = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
 let S = {daten: null, buchungen: [], zuletzt: []};
-let tab = "erfassen", gewaehlt = null, suche = "", loeschFrage = null, installEvent = null;
+let tab = "erfassen", gewaehlt = null, suche = "", loeschFrage = null, installEvent = null, belegLaeuft = false, beleg = null;
 let entwurf = {betrag: "", datum: heute(), notiz: ""};
 
 function heute() {
@@ -185,6 +185,122 @@ function betragLesen(s) {
   const n = Math.round(parseFloat(s) * 100) / 100;
   return n > 0 && n < 1000000 ? n : 0;
 }
+/* ---------- Beleg erkennen (Texterkennung auf dem Handy, Auswertung hier) ---------- */
+const KETTEN = [
+  [/\b(rewe|edeka|aldi|lidl|netto|penny|kaufland|norma|globus|marktkauf|famila|combi|tegut|nahkauf|spar|wasgau|hit|denns|alnatura|bio company)\b/i, ["lebensmittel", "einkauf", "supermarkt", "haushalt"]],
+  [/\b(dm|rossmann|m[uü]ller|budni)\b|drogerie/i, ["drogerie", "körperpflege", "hygiene", "haushalt"]],
+  [/\b(aral|shell|esso|jet|totalenergies|avia|agip|eni|star|hem|orlen|tamoil)\b|tankstelle|super e10|diesel/i, ["tanken", "kraftstoff", "benzin", "diesel", "sprit", "auto"]],
+  [/apotheke/i, ["apotheke", "gesundheit", "medikament"]],
+  [/b[äa]cker|backhaus|backstube|konditorei|\bkamps\b|\bdat backhus\b/i, ["bäcker", "backwaren", "lebensmittel"]],
+  [/restaurant|pizzeria|gastst[äa]tte|imbiss|caf[eé]\b|bistro|mcdonald|burger king|\bkfc\b|subway|trattoria|gasthof|gasthaus/i, ["restaurant", "essen gehen", "auswärts", "gastronomie", "freizeit"]],
+  [/\b(ikea|obi|bauhaus|hornbach|toom|hagebau|globus baumarkt|bauzentrum)\b|baumarkt|gartencenter/i, ["baumarkt", "haus", "garten", "renovierung", "einrichtung"]],
+  [/fressnapf|\bzoo\b|tierbedarf|futterhaus/i, ["tier", "haustier", "hund", "katze"]],
+  [/parkhaus|parkschein|parken|apcoa|contipark/i, ["parken", "auto"]],
+];
+const BETRAG_RE = /(-?\d{1,3}(?:\.\d{3})+,\d{2}|-?\d+[.,]\d{2})(?![\d%])/g;
+function zahlLesen(s) { s = String(s).replace(/\s/g, ""); if (/,\d{2}$/.test(s)) s = s.replace(/\./g, "").replace(",", "."); return parseFloat(s); }
+function isoDatum(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+function normHaendler(s) { return String(s || "").toLowerCase().replace(/[^a-zäöüß0-9]+/g, " ").trim().split(" ").slice(0, 2).join(" "); }
+function zeilenBilden(linien) {
+  const L = (linien || []).filter(l => l && typeof l.t === "string" && l.t.trim())
+    .map(l => ({t: l.t.trim(), x: +l.x || 0, h: Math.max(1, +l.h || 20), yc: (+l.y || 0) + Math.max(1, +l.h || 20) / 2}))
+    .sort((a, b) => a.yc - b.yc);
+  const rows = [];
+  for (const l of L) {
+    let r = null;
+    for (let i = rows.length - 1; i >= 0 && i >= rows.length - 4; i--)
+      if (Math.abs(rows[i].yc - l.yc) < Math.min(rows[i].h, l.h) * 0.6) { r = rows[i]; break; }
+    if (r) { r.teile.push(l); r.h = Math.max(r.h, l.h); }
+    else rows.push({yc: l.yc, h: l.h, teile: [l]});
+  }
+  return rows.map(r => r.teile.sort((a, b) => a.x - b.x).map(t => t.t).join("  "));
+}
+function belegAuswerten(linien, heuteD) {
+  heuteD = heuteD || new Date();
+  const zeilen = zeilenBilden(linien);
+  const text = zeilen.join("\n");
+  const AUS = /mwst|\bust\b|ust\.|netto|steuer|r[uü]ckgeld|zur[uü]ck|gegeben|rabatt|nachlass|pfand ?r[uü]ck|coupon|punkte|trinkgeld|zwischensumme|\btip\b/i;
+  const STUFEN = [
+    /zu zahlen|zahlbetrag|endbetrag|gesamtbetrag|rechnungsbetrag/i,
+    /\bsumme\b|\bgesamt\b|\btotal\b|\bsum\b|\bbetrag\b/i,
+    /\bec[- ]?(karte|cash)?\b|kartenzahlung|girocard|\bvisa\b|mastercard|maestro|kreditkarte|\bbar\b/i,
+  ];
+  let betrag = 0;
+  stufen: for (const re of STUFEN) {
+    for (let i = 0; i < zeilen.length; i++) {
+      const z = zeilen[i];
+      if (!re.test(z) || AUS.test(z)) continue;
+      let m = [...z.matchAll(BETRAG_RE)];
+      if (!m.length && i + 1 < zeilen.length && !/[a-zäöü]{4}/i.test(zeilen[i + 1])) m = [...zeilen[i + 1].matchAll(BETRAG_RE)];
+      for (let k = m.length - 1; k >= 0; k--) {
+        const v = zahlLesen(m[k][1]);
+        if (v > 0 && v < 100000) { betrag = v; break stufen; }
+      }
+    }
+  }
+  const sicher = betrag > 0;
+  if (!betrag) {
+    for (const z of zeilen) if (!AUS.test(z)) for (const m of z.matchAll(BETRAG_RE)) {
+      const v = zahlLesen(m[1]); if (v > betrag && v < 100000) betrag = v;
+    }
+  }
+  let datum = null;
+  for (const m of text.matchAll(/(?<!\d)(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4}|\d{2})(?!\d)/g)) {
+    let j = +m[3]; if (j < 100) j += 2000;
+    const d = new Date(j, +m[2] - 1, +m[1]);
+    if (d.getDate() !== +m[1] || d.getMonth() !== +m[2] - 1) continue;
+    const diff = (heuteD - d) / 86400000;
+    if (diff >= -1 && diff <= 400) { datum = isoDatum(d); break; }
+  }
+  let haendler = "";
+  for (const z of zeilen.slice(0, 6)) {
+    const s = z.replace(/\s{2,}/g, " ").trim();
+    if (s.replace(/[^A-Za-zÄÖÜäöüß]/g, "").length < 3) continue;
+    if (/kassenbon|kassenbeleg|beleg|rechnung|quittung|willkommen|herzlich|danke|tel\.?\s*\d|telefon|fax|www\.|@|stra(ß|ss)e|str\.|\b\d{5}\b|ust|steuer|filiale|markt ?nr|uhrzeit|datum/i.test(s)) continue;
+    haendler = s.slice(0, 40);
+    if (haendler === haendler.toUpperCase() && haendler.length > 4) haendler = haendler.toLowerCase().replace(/(^|[\s\-])([a-zäöü])/g, (a, b, c) => b + c.toUpperCase());
+    break;
+  }
+  return {betrag, sicher, datum, haendler, text};
+}
+
+function posVorschlag(haendler, text) {
+  const key = normHaendler(haendler);
+  if (key && S.lernen && S.lernen[key] && posVon(S.lernen[key])) return S.lernen[key];
+  const quelle = haendler + " " + String(text || "").slice(0, 400);
+  const ps = positionen().filter(x => x.a === "A");
+  for (const [re, worte] of KETTEN) if (re.test(quelle)) {
+    for (const w of worte) { const p = ps.find(x => x.n.toLowerCase().includes(w)); if (p) return p.id; }
+    for (const w of worte) { const p = ps.find(x => x.k.toLowerCase().includes(w)); if (p) return p.id; }
+  }
+  return null;
+}
+function belegKann() { return !!(window.HPAndroid && typeof HPAndroid.belegScannen === "function"); }
+function belegStarten(quelle) {
+  if (!belegKann() || belegLaeuft) return;
+  belegLaeuft = true; zeichnen();
+  try { HPAndroid.belegScannen(quelle); } catch (x) { belegLaeuft = false; meldung("Kamera nicht verfügbar."); zeichnen(); }
+}
+window.belegErgebnis = function (json) {
+  belegLaeuft = false;
+  let r = null;
+  try { r = JSON.parse(json); } catch (x) {}
+  if (!r || !r.ok) {
+    if (!(r && r.abbruch)) meldung((r && r.fehler) || "Der Beleg konnte nicht gelesen werden.");
+    zeichnen(); return;
+  }
+  const e = belegAuswerten(r.zeilen || []);
+  if (!e.text.trim()) { meldung("Kein Text erkannt – bitte den Beleg näher und gerade fotografieren."); zeichnen(); return; }
+  if (e.betrag) entwurf.betrag = e.betrag.toFixed(2).replace(".", ",");
+  if (e.datum) entwurf.datum = e.datum;
+  if (e.haendler) entwurf.notiz = e.haendler;
+  const pos = posVorschlag(e.haendler, e.text);
+  if (pos) gewaehlt = pos;
+  beleg = {haendler: e.haendler, sicher: e.sicher, pos: !!pos};
+  tab = "erfassen"; suche = "";
+  zeichnen();
+  meldung(e.sicher ? "Beleg gelesen – bitte kurz prüfen" : "Betrag nicht sicher erkannt – bitte prüfen");
+};
 
 /* ---------- Erfassen ---------- */
 function ansichtErfassen() {
@@ -199,8 +315,17 @@ function ansichtErfassen() {
   const betragFeld = h("input", {id: "betrag", type: "text", inputmode: "decimal", autocomplete: "off", placeholder: "0,00", "aria-label": "Betrag in Euro", value: entwurf.betrag,
     oninput: e => { entwurf.betrag = e.target.value; knopfPruefen(); }});
   const p = gewaehlt ? posVon(gewaehlt) : null;
+  if (beleg) teile.push(h("div", {class: "banner", style: "display:flex;gap:8px;align-items:center"},
+    h("span", {style: "flex:1;min-width:0"}, "Vom Beleg" + (beleg.haendler ? " „" + beleg.haendler + "“" : "") + ": " +
+      (beleg.sicher ? "bitte Betrag, Datum und Position prüfen." : "Betrag bitte selbst eintragen oder prüfen.") +
+      (beleg.pos ? "" : " Position bitte wählen – beim nächsten Beleg dieses Geschäfts merkt sich die App Ihre Wahl.")),
+    h("button", {class: "x", id: "belegWeg", "aria-label": "Hinweis schließen", style: "border:0;background:none;color:inherit;cursor:pointer;font-size:16px",
+      onclick: () => { beleg = null; zeichnen(); }}, "✕")));
   const karte = h("div", {class: "karte"},
     h("h2", {}, "Neue Buchung"),
+    belegKann() ? h("div", {class: "reihe"},
+      h("button", {class: "knopf", id: "belegFoto", disabled: belegLaeuft, onclick: () => belegStarten("kamera")}, belegLaeuft ? "Beleg wird gelesen …" : "Beleg fotografieren"),
+      h("button", {class: "knopf", id: "belegGalerie", disabled: belegLaeuft, onclick: () => belegStarten("galerie")}, "Foto aus Galerie")) : null,
     h("div", {class: "betrag"}, betragFeld, h("span", {}, "€")),
     p ? h("div", {class: "gewaehlt"}, h("span", {class: "art " + p.a}, p.a === "E" ? "Einnahme" : "Ausgabe"),
           h("div", {style: "min-width:0"}, h("div", {class: "n"}, p.n), h("div", {class: "k"}, p.k)),
@@ -251,6 +376,13 @@ function buchen() {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(entwurf.datum)) { meldung("Bitte ein gültiges Datum wählen."); return; }
   S.buchungen.push({id: uuid(), d: entwurf.datum, b, pos: p.id, art: p.a, t: entwurf.notiz.trim().slice(0, 120), status: "neu", am: Date.now()});
   S.zuletzt = [p.id, ...S.zuletzt.filter(x => x !== p.id)].slice(0, 8);
+  if (beleg && beleg.haendler) {
+    S.lernen = S.lernen && typeof S.lernen === "object" ? S.lernen : {};
+    const key = normHaendler(beleg.haendler);
+    if (key) S.lernen[key] = p.id;
+    const keys = Object.keys(S.lernen); if (keys.length > 300) delete S.lernen[keys[0]];
+  }
+  beleg = null;
   if (speichern()) meldung(EUR.format(b) + " für „" + p.n + "“ gespeichert");
   entwurf = {betrag: "", datum: heute(), notiz: ""}; gewaehlt = null;
   zeichnen();

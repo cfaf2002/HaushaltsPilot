@@ -3,11 +3,19 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Kamera-App für Belegfotos finden (Android 11+) -->
+    <queries>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+    </queries>
+
     <application
         android:label="HaushaltsPilot"
         android:icon="@mipmap/ic_launcher"
         android:theme="@style/Thema"
-        android:allowBackup="false">
+        android:allowBackup="false"
+        android:largeHeap="true">
 
         <activity
             android:name=".MainActivity"
