@@ -49,6 +49,8 @@ public class MainActivity extends Activity {
     private WebView web;
     private ValueCallback<Uri[]> dateiRueckruf;
     private Uri fotoUri;
+    private boolean seiteBereit;
+    private String belegWartet;
 
     @Override
     protected void onCreate(Bundle zustand) {
@@ -72,6 +74,22 @@ public class MainActivity extends Activity {
                 WebResourceResponse antwort = lader.shouldInterceptRequest(r.getUrl());
                 // alles, was nicht aus der App kommt, wird blockiert
                 return antwort != null ? antwort : new WebResourceResponse("text/plain", "utf-8", null);
+            }
+
+            @Override
+            public void onPageStarted(WebView v, String url, android.graphics.Bitmap icon) {
+                seiteBereit = false;
+            }
+
+            @Override
+            public void onPageFinished(WebView v, String url) {
+                seiteBereit = true;
+                // Ergebnis eines Belegfotos, das vor dem Laden der Seite fertig wurde (App war im Hintergrund beendet)
+                if (belegWartet != null) {
+                    String j = belegWartet;
+                    belegWartet = null;
+                    belegSenden(j);
+                }
             }
 
             @Override
@@ -101,8 +119,7 @@ public class MainActivity extends Activity {
 
         web.addJavascriptInterface(new Bruecke(), "HPAndroid");
 
-        if (zustand == null) web.loadUrl(START);
-        else web.restoreState(zustand);
+        if (zustand == null || web.restoreState(zustand) == null) web.loadUrl(START);
     }
 
     @Override
@@ -226,8 +243,14 @@ public class MainActivity extends Activity {
     }
 
     private void belegAntwort(String json) {
-        runOnUiThread(() -> web.evaluateJavascript(
-                "window.belegErgebnis && window.belegErgebnis(" + JSONObject.quote(json) + ")", null));
+        runOnUiThread(() -> {
+            if (seiteBereit) belegSenden(json);
+            else belegWartet = json;
+        });
+    }
+
+    private void belegSenden(String json) {
+        web.evaluateJavascript("window.belegErgebnis && window.belegErgebnis(" + JSONObject.quote(json) + ")", null);
     }
 
     private static String fehler(String t) {

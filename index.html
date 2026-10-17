@@ -332,7 +332,7 @@ function ansichtErfassen() {
           h("button", {id: "posAendern", onclick: () => { gewaehlt = null; zeichnen(); }}, "Ändern"))
       : positionWahl(),
     h("div", {class: "reihe"},
-      h("div", {}, h("label", {for: "datum"}, "Datum"), h("input", {id: "datum", type: "date", value: entwurf.datum, max: heute(), oninput: e => entwurf.datum = e.target.value})),
+      h("div", {}, h("label", {for: "datum"}, "Datum"), h("input", {id: "datum", type: "date", value: entwurf.datum, max: heute(), min: (new Date().getFullYear() - 1) + "-01-01", oninput: e => entwurf.datum = e.target.value})),
       h("div", {}, h("label", {for: "notiz"}, "Notiz (optional)"), h("input", {id: "notiz", type: "text", maxlength: "120", value: entwurf.notiz, placeholder: "z. B. Wochenmarkt", oninput: e => entwurf.notiz = e.target.value}))),
     h("button", {class: "knopf haupt", id: "buchen", onclick: buchen}, "Buchung speichern"),
     h("p", {class: "hinweis"}, "Gedacht für Barzahlungen. Karten- und Überweisungsbeträge kommen über den Kontoauszug auf den PC."));
@@ -478,7 +478,7 @@ function ansichtAustausch() {
   const datei = h("input", {id: "datei", type: "file", hidden: true, onchange: dateiLaden});
   const k1 = h("div", {class: "karte"},
     h("h2", {}, "1 · Übersicht vom PC laden"),
-    h("p", {class: "hinweis"}, D && !D.demo ? "Geladen: Stand vom " + D.stand.replace(/^(\d{4})-(\d\d)-(\d\d)/, "$3.$2.$1") + " Uhr." : "Wählen Sie die Datei HaushaltsPilot_Handy.json aus Ihrem Austauschordner (z. B. in OneDrive)."),
+    h("p", {class: "hinweis"}, D && !D.demo ? "Geladen: Stand vom " + String(D.stand || "").replace(/^(\d{4})-(\d\d)-(\d\d)/, "$3.$2.$1") + " Uhr." : "Wählen Sie die Datei HaushaltsPilot_Handy.json aus Ihrem Austauschordner (z. B. in OneDrive)."),
     datei,
     h("button", {class: "knopf haupt", id: "laden", onclick: () => datei.click()}, "Datei vom PC laden"),
     h("p", {class: "fehler", id: "ladeFehler", hidden: true}));
@@ -510,10 +510,12 @@ function dateiLaden(e) {
   r.onload = () => {
     let d;
     try { d = JSON.parse(String(r.result).replace(/^﻿/, "")); } catch (x) { fehler("Die Datei ist keine gültige Übersicht. Bitte HaushaltsPilot_Handy.json wählen."); return; }
-    if (!d || d.app !== "HaushaltsPilot" || d.v !== 1 || !Array.isArray(d.positionen)) { fehler("Das ist nicht die Übersicht vom HaushaltsPilot (HaushaltsPilot_Handy.json)."); return; }
+    if (!d || d.app !== "HaushaltsPilot" || d.v !== 1 || !Array.isArray(d.positionen) || typeof d.stand !== "string" ||
+        !Number.isInteger(d.jahr) || !Number.isInteger(d.monat) || d.monat < 1 || d.monat > 12) { fehler("Das ist nicht die Übersicht vom HaushaltsPilot (HaushaltsPilot_Handy.json)."); return; }
     d.positionen = d.positionen.filter(p => p && Number.isInteger(p.id) && typeof p.n === "string").map(p => ({id: p.id, n: p.n, k: String(p.k || ""), a: p.a === "E" ? "E" : "A"}));
     d.kategorien = Array.isArray(d.kategorien) ? d.kategorien : [];
     d.faellig = Array.isArray(d.faellig) ? d.faellig : [];
+    if (typeof d.bankBis !== "string") d.bankBis = null;
     const da = new Set(Array.isArray(d.importiert) ? d.importiert.map(String) : []);
     const vorher = S.buchungen.length;
     S.buchungen = S.buchungen.filter(b => !da.has(b.id));
