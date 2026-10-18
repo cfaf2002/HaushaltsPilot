@@ -33,7 +33,7 @@
 html,body{height:100%}
 body{background:var(--bg);color:var(--text);font-family:var(--f-text);font-size:15px;line-height:1.4}
 *{box-sizing:border-box}
-button,input{font:inherit;color:inherit}
+button,input,select{font:inherit;color:inherit}
 .kopf{background:#24375e;color:#fff;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;
   padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   display:flex;align-items:center;gap:10px}
@@ -47,8 +47,8 @@ h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--ged)
 .hinweis{font-size:13px;color:var(--ged);margin:0}
 .banner{background:var(--chip);border:1px dashed var(--linie);border-radius:10px;padding:8px 12px;font-size:13px;color:var(--ged)}
 label{font-size:13px;color:var(--ged);display:block;margin-bottom:4px}
-input[type=text],input[type=date],input[type=search]{width:100%;border:1px solid var(--linie);background:var(--karte);border-radius:9px;padding:10px 12px;min-height:44px}
-input:focus-visible,button:focus-visible{outline:2px solid var(--akz);outline-offset:2px}
+input[type=text],input[type=date],input[type=search],select{width:100%;border:1px solid var(--linie);background:var(--karte);border-radius:9px;padding:10px 12px;min-height:44px}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--akz);outline-offset:2px}
 .betrag{display:flex;align-items:baseline;gap:8px;border-bottom:2px solid var(--linie);padding-bottom:4px}
 .betrag input{border:0;background:transparent;font-family:var(--f-zahl);font-size:38px;font-weight:650;width:100%;min-width:0;padding:0;font-variant-numeric:tabular-nums}
 .betrag input:focus{outline:none}
@@ -135,8 +135,8 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--akz);outline-of
 const SPEICHER = "hp.handy.v1";
 const EUR = new Intl.NumberFormat("de-DE", {style: "currency", currency: "EUR"});
 const MONATE = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
-let S = {daten: null, buchungen: [], zuletzt: []};
-let tab = "erfassen", gewaehlt = null, suche = "", loeschFrage = null, installEvent = null, belegLaeuft = false, beleg = null;
+let S = {daten: null, buchungen: [], zuletzt: [], neuePos: []};
+let tab = "erfassen", gewaehlt = null, suche = "", neuForm = null, loeschFrage = null, installEvent = null, belegLaeuft = false, beleg = null;
 let entwurf = {betrag: "", datum: heute(), notiz: ""};
 
 function heute() {
@@ -175,7 +175,28 @@ function uuid() {
   const a = new Uint8Array(16); crypto.getRandomValues(a);
   return Array.from(a, b => b.toString(16).padStart(2, "0")).join("");
 }
-function positionen() { return (S.daten && S.daten.positionen) || []; }
+function positionen() { return ((S.daten && S.daten.positionen) || []).concat(Array.isArray(S.neuePos) ? S.neuePos : []); }
+function kategorienAlle() {
+  const D = S.daten || {}, m = new Map();
+  if (Array.isArray(D.katalle)) for (const k of D.katalle) if (k && typeof k.k === "string" && k.k) m.set(k.k, k.a === "E" ? "E" : "A");
+  for (const p of (D.positionen || [])) if (p.k && !m.has(p.k)) m.set(p.k, p.a);
+  return Array.from(m, ([k, a]) => ({k, a}));
+}
+function neuePosAnlegen(name, k) {
+  name = String(name || "").trim().slice(0, 100);
+  if (!name) { meldung("Bitte einen Namen eingeben."); return; }
+  const kat = kategorienAlle().find(x => x.k === k);
+  if (!kat) { meldung("Bitte eine Kategorie wählen."); return; }
+  const gibt = positionen().find(x => x.n.toLowerCase() === name.toLowerCase());
+  if (gibt) { neuForm = null; waehlen(gibt.id); return; }
+  const p = {id: -Date.now(), n: name, k: kat.k, a: kat.a, neu: true};
+  if (!Array.isArray(S.neuePos)) S.neuePos = [];
+  S.neuePos.push(p);
+  speichern();
+  neuForm = null;
+  meldung("„" + name + "“ wird beim nächsten Senden am PC angelegt");
+  waehlen(p.id);
+}
 function posVon(id) { return positionen().find(p => p.id === id) || null; }
 function offen() { return S.buchungen.filter(b => b.status !== "angekommen"); }
 function betragLesen(s) {
@@ -341,7 +362,23 @@ function ansichtErfassen() {
   setTimeout(knopfPruefen);
   return teile;
 }
+function neuPosFormular() {
+  const kats = kategorienAlle();
+  const name = h("input", {id: "neuName", type: "text", maxlength: "100", value: neuForm.n, "aria-label": "Name der neuen Position",
+    oninput: e => neuForm.n = e.target.value});
+  const wahl = h("select", {id: "neuKat", "aria-label": "Kategorie", onchange: e => neuForm.k = e.target.value},
+    h("option", {value: ""}, "Kategorie wählen …"),
+    kats.map(x => h("option", {value: x.k, selected: x.k === neuForm.k}, x.k + (x.a === "E" ? " (Einnahme)" : ""))));
+  return h("div", {class: "karte", style: "margin:0;padding:12px;border:1px solid var(--linie)"},
+    h("label", {for: "neuName"}, "Neue Position"), name, h("div", {style: "height:8px"}),
+    h("label", {for: "neuKat"}, "Kategorie"), wahl,
+    h("p", {class: "hinweis"}, "Wird beim nächsten Senden am PC in den Grunddaten angelegt."),
+    h("div", {class: "reihe"},
+      h("button", {class: "knopf", id: "neuAbbruch", onclick: () => { neuForm = null; zeichnen(); }}, "Abbrechen"),
+      h("button", {class: "knopf haupt", id: "neuOk", onclick: () => neuePosAnlegen(neuForm.n, neuForm.k)}, "Anlegen")));
+}
 function positionWahl() {
+  if (neuForm) return neuPosFormular();
   const box = h("div", {});
   const ps = positionen();
   const zuletzt = S.zuletzt.map(posVon).filter(Boolean).slice(0, 8);
@@ -354,11 +391,17 @@ function positionWahl() {
     liste.textContent = "";
     const q = suche.trim().toLowerCase();
     const treffer = ps.filter(x => !q || x.n.toLowerCase().includes(q) || x.k.toLowerCase().includes(q));
+    // gibt es den Namen noch nicht genau so: als neue Position anbieten
+    if (q && !ps.some(x => x.n.toLowerCase() === q)) {
+      liste.append(h("button", {id: "neuPos", style: "color:var(--prim);font-weight:600", onclick: () => { neuForm = {n: suche.trim(), k: ""}; zeichnen(); }},
+        h("span", {style: "min-width:0;flex:1"}, "+ „" + suche.trim() + "“ als neue Position anlegen")));
+    }
     if (!treffer.length) { liste.append(h("div", {class: "leer", style: "padding:12px"}, "Keine Position gefunden.")); return; }
     let grp = null;
     for (const x of treffer.slice(0, 150)) {
       if (x.k !== grp) { grp = x.k; liste.append(h("div", {class: "grp"}, grp)); }
-      liste.append(h("button", {onclick: () => waehlen(x.id)}, h("span", {style: "min-width:0;flex:1"}, x.n), h("span", {class: "art " + x.a}, x.a === "E" ? "E" : "A")));
+      liste.append(h("button", {onclick: () => waehlen(x.id)}, h("span", {style: "min-width:0;flex:1"}, x.n, x.neu ? h("span", {class: "status neu"}, "neu") : null),
+        h("span", {class: "art " + x.a}, x.a === "E" ? "E" : "A")));
     }
   }
   listeFuellen();
@@ -374,7 +417,9 @@ function buchen() {
   const b = betragLesen(entwurf.betrag), p = posVon(gewaehlt);
   if (!b || !p) { meldung("Bitte Betrag und Position angeben."); return; }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(entwurf.datum)) { meldung("Bitte ein gültiges Datum wählen."); return; }
-  S.buchungen.push({id: uuid(), d: entwurf.datum, b, pos: p.id, art: p.a, t: entwurf.notiz.trim().slice(0, 120), status: "neu", am: Date.now()});
+  const bu = {id: uuid(), d: entwurf.datum, b, pos: p.id, art: p.a, t: entwurf.notiz.trim().slice(0, 120), status: "neu", am: Date.now()};
+  if (p.neu) bu.neu = {n: p.n, k: p.k};
+  S.buchungen.push(bu);
   S.zuletzt = [p.id, ...S.zuletzt.filter(x => x !== p.id)].slice(0, 8);
   if (beleg && beleg.haendler) {
     S.lernen = S.lernen && typeof S.lernen === "object" ? S.lernen : {};
@@ -393,7 +438,7 @@ function listeOffen() {
   if (!o.length) { karte.append(h("div", {class: "leer"}, "Alles übertragen.")); return karte; }
   const box = h("div", {});
   for (const b of o) {
-    const p = posVon(b.pos);
+    const p = posVon(b.pos) || (b.neu ? {n: b.neu.n, k: b.neu.k} : null);
     const sicher = loeschFrage === b.id;
     box.append(h("div", {class: "zeile"},
       h("span", {class: "d"}, datumKurz(b.d)),
@@ -419,7 +464,7 @@ function ansichtUebersicht() {
   const lokal = {};
   for (const b of offen()) {
     if (!String(b.d).startsWith(praefix)) continue;
-    const p = posVon(b.pos); if (!p) continue;
+    const p = posVon(b.pos) || (b.neu ? {n: b.neu.n, k: b.neu.k} : null); if (!p) continue;
     lokal[p.k] = (lokal[p.k] || 0) + b.b;
   }
   const kats = (D.kategorien || []).map(k => ({...k, handy: lokal[k.k] || 0}));
@@ -521,6 +566,18 @@ function dateiLaden(e) {
     S.buchungen = S.buchungen.filter(b => !da.has(b.id));
     const angekommen = vorher - S.buchungen.length;
     S.daten = d;
+    if (Array.isArray(S.neuePos) && S.neuePos.length) {
+      const namen = new Map(d.positionen.map(x => [x.n.toLowerCase(), x.id]));
+      for (const v of S.neuePos) {
+        const echt = namen.get(v.n.toLowerCase());
+        if (echt === undefined) continue;
+        S.zuletzt = S.zuletzt.map(z => z === v.id ? echt : z);
+        if (S.lernen) for (const k in S.lernen) if (S.lernen[k] === v.id) S.lernen[k] = echt;
+        for (const b of S.buchungen) if (b.pos === v.id && b.status === "neu") { b.pos = echt; delete b.neu; }
+        if (gewaehlt === v.id) gewaehlt = echt;
+      }
+      S.neuePos = S.neuePos.filter(v => !namen.has(v.n.toLowerCase()));
+    }
     speichern();
     meldung("Übersicht geladen" + (angekommen ? " · " + angekommen + " Buchung(en) am PC angekommen" : ""));
     zeichnen();
@@ -534,7 +591,8 @@ async function senden() {
   const jetzt = new Date(), z = n => String(n).padStart(2, "0");
   const name = "HP_Handy_" + jetzt.getFullYear() + z(jetzt.getMonth() + 1) + z(jetzt.getDate()) + "-" + z(jetzt.getHours()) + z(jetzt.getMinutes()) + z(jetzt.getSeconds()) + ".json";
   const inhalt = JSON.stringify({app: "HaushaltsPilot-Handy", v: 1, erstellt: jetzt.toISOString(),
-    buchungen: o.map(b => ({id: b.id, d: b.d, b: b.b, pos: b.pos, art: b.art, t: b.t}))});
+    buchungen: o.map(b => b.neu ? {id: b.id, d: b.d, b: b.b, pos: 0, art: b.art, t: b.t, neu: b.neu.n, nk: b.neu.k}
+                                : {id: b.id, d: b.d, b: b.b, pos: b.pos, art: b.art, t: b.t})});
   const blob = new Blob([inhalt], {type: "application/json"});
   let ok = false;
   if (window.HPAndroid) {
