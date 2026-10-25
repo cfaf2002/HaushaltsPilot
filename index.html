@@ -531,7 +531,7 @@ function ansichtAustausch() {
     h("h2", {}, "2 · Buchungen an den PC senden"),
     h("p", {class: "hinweis"}, o.length ? o.length + " Buchung(en) sind noch nicht am PC angekommen. Speichern Sie die Datei im selben Austauschordner. Doppelt senden schadet nicht." : "Keine offenen Buchungen."),
     h("button", {class: "knopf haupt", id: "senden", disabled: !o.length, onclick: senden}, o.length ? "Senden (" + o.length + ")" : "Senden"),
-    h("p", {class: "hinweis"}, "Am PC übernimmt der HaushaltsPilot die Buchungen beim nächsten Start oder mit Einstellungen › Jetzt abgleichen. Danach hier erneut die Übersicht laden – angekommene Buchungen verschwinden aus der Liste."));
+    h("p", {class: "hinweis"}, "Ist der HaushaltsPilot am PC geöffnet, übernimmt er gesendete Buchungen automatisch nach spätestens 2 Minuten (sofort: Einstellungen › Jetzt abgleichen), sonst beim nächsten Start. Danach hier „Datei vom PC laden“ – angekommene Buchungen verschwinden aus der Liste."));
   const k3 = h("div", {class: "karte"}, h("h2", {}, "Auf diesem Handy"));
   if (installEvent) k3.append(h("button", {class: "knopf", id: "installieren", onclick: async () => { installEvent.prompt(); installEvent = null; zeichnen(); }}, "Als App installieren"));
   k3.append(h("div", {class: "reihe"},
